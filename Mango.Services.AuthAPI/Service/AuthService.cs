@@ -37,8 +37,8 @@ namespace Mango.Services.AuthAPI.Service
                     Token = null,
                 };
             }
-
-            var token = _jwtTokenGenerator.GenerateToken(user);
+            var roles = await _userManager.GetRolesAsync(user);
+            var token = _jwtTokenGenerator.GenerateToken(user, roles);
 
             UserDto userDto = new()
             {
