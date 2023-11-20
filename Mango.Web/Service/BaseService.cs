@@ -67,6 +67,18 @@ namespace Mango.Web.Service
                         var apiContent = await apiResponse.Content.ReadAsStringAsync();
                         var apiResponseDto = new ResponseDto();
                         //check ResponseDto?
+                        apiResponseDto = JsonConvert.DeserializeObject<ResponseDto>(apiContent);
+
+                        if (apiResponseDto.IsSuccess == false)
+                        {
+                            var res = new ResponseDto
+                            {
+                                IsSuccess = false,
+                                Message = apiResponseDto.Message
+                            };
+                            return res;
+                        }
+                       
                         apiResponseDto.Result = JsonConvert.DeserializeObject<object>(apiContent);
 
                         return apiResponseDto;
