@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using Mango.MessageBus;
 using Mango.Services.ShoppingCartAPI.Data;
 using Mango.Services.ShoppingCartAPI.Models;
 using Mango.Services.ShoppingCartAPI.Models.Dto;
@@ -18,14 +19,18 @@ namespace Mango.Services.ShoppingCartAPI.Controllers
         private readonly AppDbContext _db;
         private IProductService _productService;
         private ICouponService _couponService;
+        private readonly IMessageBus _messageBus;
+        private IConfiguration _configuration;
 
-        public CartAPIController(IMapper mapper, AppDbContext db, IProductService productService, ICouponService couponService)
+        public CartAPIController(IMapper mapper, AppDbContext db, IProductService productService, ICouponService couponService, IMessageBus messageBus, IConfiguration configuration)
         {
             _response = new ResponseDto();
             _mapper = mapper;
             _db = db;
             _productService = productService;
             _couponService = couponService;
+            _messageBus = messageBus;
+            _configuration = configuration;
         }
 
         [HttpPost("CartUpsert")]
@@ -156,6 +161,22 @@ namespace Mango.Services.ShoppingCartAPI.Controllers
                 cartHeaderFromDb.CouponCode = cartDto.CartHeader.CouponCode;
                 _db.CartHeaders.Update(cartHeaderFromDb);
                 await _db.SaveChangesAsync();
+                _response.Result = true;
+            }
+            catch (Exception ex)
+            {
+                _response.Message = ex.Message.ToString();
+                _response.IsSuccess = false;
+            }
+            return _response;
+        }
+
+        [HttpPost("EmailCartRequest")]
+        public async Task<ResponseDto> EmailCartRequest([FromBody] CartDto cartDto)
+        {
+            try
+            {
+                await _messageBus.PublishMessage(cartDto, _configuration.GetValue<string>("TopicAndQueueNames:EmailShoppingCart"));
                 _response.Result = true;
             }
             catch (Exception ex)
