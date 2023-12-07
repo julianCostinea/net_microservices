@@ -1,6 +1,6 @@
-﻿
+﻿using System.ComponentModel.DataAnnotations;
 
-namespace Mango.Services.ShoppingCartAPI.Models.Dto
+namespace Mango.Services.OrderAPI.Models.Dto
 {
     public class CartHeaderDto
     {
@@ -12,5 +12,6 @@ namespace Mango.Services.ShoppingCartAPI.Models.Dto
         public string? Name { get; set; }
         public string? Phone { get; set; }
         public string? Email { get; set; }
+
     }
 }
