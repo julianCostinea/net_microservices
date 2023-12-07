@@ -1,4 +1,5 @@
-﻿using Mango.Services.AuthAPI.Models.Dto;
+﻿using Mango.MessageBus;
+using Mango.Services.AuthAPI.Models.Dto;
 using Mango.Services.AuthAPI.Service.IService;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -11,11 +12,15 @@ namespace Mango.Services.AuthAPI.Controllers
     {
         private readonly IAuthService _authService;
         protected ResponseDto _response;
+        private readonly IMessageBus _messageBus;
+        private readonly IConfiguration _configuration;
 
-        public AuthAPIController(IAuthService authService)
+        public AuthAPIController(IAuthService authService, IMessageBus messageBus, IConfiguration configuration)
         {
             _authService = authService;
             _response = new ResponseDto();
+            _messageBus = messageBus;
+            _configuration = configuration;
         }
         [HttpPost("register")]
         public async Task<IActionResult> Register([FromBody] RegistrationRequestDto model)
@@ -26,6 +31,19 @@ namespace Mango.Services.AuthAPI.Controllers
                 _response.IsSuccess = false;
                 _response.Message = errorMessage;
                 return BadRequest(_response);
+            }
+
+            try
+            {
+                var userQueue = _configuration.GetValue<string>("TopicAndQueueNames:RegisterUserQueue");
+                var connectionString = "Endpoint=sb://mangowebemil.servicebus.windows.net/;SharedAccessKeyName=Register;SharedAccessKey=3n0in6syn86wFjdbahzL60R2qharqfWt7+ASbO+rc3I=;EntityPath=registeruser";
+                await _messageBus.PublishMessage(model.Email, "registeruser", connectionString);
+                _response.Result = true;
+            }
+            catch (Exception ex)
+            {
+                _response.Message = ex.Message.ToString();
+                _response.IsSuccess = false;
             }
             return Ok(_response);
         }

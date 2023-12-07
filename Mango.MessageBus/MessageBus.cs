@@ -10,10 +10,12 @@ namespace Mango.MessageBus
 {
     public class MessageBus : IMessageBus
     {
-        private string connectionString = "Endpoint=sb://mangowebemil.servicebus.windows.net/;SharedAccessKeyName=MangoWeb;SharedAccessKey=N/bkJzeo1FcG3xXTwQkbl5WNe/Icn+m3U+ASbJ1ZokM=;EntityPath=emailshoppingcart";
-        public async Task PublishMessage(object message, string topic_queue_Name)
+        private string _connectionString = "Endpoint=sb://mangowebemil.servicebus.windows.net/;SharedAccessKeyName=MangoWeb;SharedAccessKey=N/bkJzeo1FcG3xXTwQkbl5WNe/Icn+m3U+ASbJ1ZokM=;EntityPath=emailshoppingcart";
+        public async Task PublishMessage(object message, string topic_queue_Name, string connectionString = "")
         {
-            await using var client = new ServiceBusClient(connectionString);
+            var usedConnectionString = string.IsNullOrEmpty(connectionString) ? _connectionString : connectionString;
+
+            await using var client = new ServiceBusClient(usedConnectionString);
 
             ServiceBusSender sender = client.CreateSender(topic_queue_Name);
 
