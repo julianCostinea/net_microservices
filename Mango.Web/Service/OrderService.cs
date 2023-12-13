@@ -46,9 +46,14 @@ namespace Mango.Web.Service
             throw new NotImplementedException();
         }
 
-        public Task<ResponseDto?> ValidateStripeSession(int orderHeaderId)
+        public async Task<ResponseDto?> ValidateStripeSession(int orderHeaderId)
         {
-            throw new NotImplementedException();
+            return await _baseService.SendAsync(new RequestDto()
+            {
+                ApiType = SD.ApiType.POST,
+                Data = orderHeaderId,
+                Url = SD.OrderAPIBase + "/api/order/ValidateStripeSession"
+            });
         }
     }
 }
