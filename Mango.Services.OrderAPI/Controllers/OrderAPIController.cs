@@ -144,14 +144,15 @@ namespace Mango.Services.OrderAPI.Controllers
                     orderHeader.PaymentIntentId = paymentIntent.Id;
                     orderHeader.Status = SD.Status_Approved;
                     _db.SaveChanges();
-                    //RewardsDto rewardsDto = new()
-                    //{
-                    //    OrderId = orderHeader.OrderHeaderId,
-                    //    RewardsActivity = Convert.ToInt32(orderHeader.OrderTotal),
-                    //    UserId = orderHeader.UserId
-                    //};
-                    //string topicName = _configuration.GetValue<string>("TopicAndQueueNames:OrderCreatedTopic");
-                    //await _messageBus.PublishMessage(rewardsDto, topicName);
+                    RewardsDto rewardsDto = new()
+                    {
+                        OrderId = orderHeader.OrderHeaderId,
+                        RewardsActivity = Convert.ToInt32(orderHeader.OrderTotal),
+                        UserId = orderHeader.UserId
+                    };
+                    string topicName = _configuration.GetValue<string>("TopicAndQueueNames:OrderCreatedTopic");
+                    var connectionString = "Endpoint=sb://mangowebemil.servicebus.windows.net/;SharedAccessKeyName=ordercreatedaccess;SharedAccessKey=dC3J+DaXpRSy9GEJ9g6yFkXxlWkhVQEvy+ASbAnLB0Q=;EntityPath=ordercreated";
+                    await _messageBus.PublishMessage(rewardsDto, topicName, connectionString);
                     _response.Result = _mapper.Map<OrderHeaderDto>(orderHeader);
                 }
 
