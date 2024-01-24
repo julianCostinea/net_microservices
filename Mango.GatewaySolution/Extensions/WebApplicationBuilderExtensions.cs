@@ -6,19 +6,24 @@ namespace Mango.GatewaySolution.Extensions
 {
     public static class WebApplicationBuilderExtensions
     {
-        public static WebApplicationBuilder AddAppAuthenication (this WebApplicationBuilder builder)
+        public static WebApplicationBuilder AddAppAuthetication(this WebApplicationBuilder builder)
         {
-            var secret = builder.Configuration.GetValue<string>("ApiSettings:Secret");
-            var issuer = builder.Configuration.GetValue<string>("ApiSettings:Issuer");
-            var audience = builder.Configuration.GetValue<string>("ApiSettings:Audience");
+            var authenticationProviderKey = "Bearer";
+
+            var settingsSection = builder.Configuration.GetSection("ApiSettings");
+
+            var secret = settingsSection.GetValue<string>("Secret");
+            var issuer = settingsSection.GetValue<string>("Issuer");
+            var audience = settingsSection.GetValue<string>("Audience");
 
             var key = Encoding.ASCII.GetBytes(secret);
+
 
             builder.Services.AddAuthentication(x =>
             {
                 x.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
                 x.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
-            }).AddJwtBearer(x =>
+            }).AddJwtBearer(authenticationProviderKey, x =>
             {
                 x.TokenValidationParameters = new TokenValidationParameters
                 {
@@ -26,8 +31,8 @@ namespace Mango.GatewaySolution.Extensions
                     IssuerSigningKey = new SymmetricSecurityKey(key),
                     ValidateIssuer = true,
                     ValidIssuer = issuer,
-                    ValidateAudience = true,
                     ValidAudience = audience,
+                    ValidateAudience = true
                 };
             });
 
