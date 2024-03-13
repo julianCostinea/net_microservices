@@ -14,11 +14,14 @@ namespace Mango.Web.Controllers
     {
         private readonly ICartService _cartService;
         private readonly IOrderService _orderService;
+        private readonly ILogger<CartController> _logger;
 
-        public CartController(ICartService cartService, IOrderService orderService)
+        public CartController(ICartService cartService, IOrderService orderService, ILogger<CartController> logger)
         {
             _cartService = cartService;
             _orderService = orderService;
+            _logger = logger;
+
         }
         [Authorize]
         public async Task<IActionResult> CartIndex()
@@ -86,10 +89,15 @@ namespace Mango.Web.Controllers
         private async Task<CartDto> LoadCartDtoBasedOnLoggedInUser()
         {
             var userId = User.Claims.Where(u => u.Type == JwtRegisteredClaimNames.Sub)?.FirstOrDefault()?.Value;
+            //log user id
+            _logger.LogInformation("UserId: " + userId);
+
             ResponseDto? response = await _cartService.GetCartByUserIdAsync(userId);
             if (response != null && response.IsSuccess)
             {
                 CartDto cartDto = JsonConvert.DeserializeObject<CartDto>(Convert.ToString(response.Result));
+                //log cart
+                _logger.LogInformation("CartDto: " + cartDto.CartHeader.CartHeaderId);
                 return cartDto;
             }
             return new CartDto();
