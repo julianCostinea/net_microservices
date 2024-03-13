@@ -4,6 +4,10 @@
     <br />
     <input asp-for="CartHeader.UserId" hidden />
     <input asp-for="CartHeader.CartHeaderId" hidden />
+    <p>
+        count is: 
+        @Model.CartDetails.Count();
+    </p>
     <div class="">
         <div class="card border mt-4 container">
             <div class="card-header bg-dark text-light ml-0 row ">
