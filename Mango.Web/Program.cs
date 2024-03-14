@@ -2,8 +2,12 @@ using Mango.Web.Service;
 using Mango.Web.Service.IService;
 using Mango.Web.Utility;
 using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.Extensions.Logging.AzureAppServices;
 
 var builder = WebApplication.CreateBuilder(args);
+
+//add azureWebAppDiagnostics
+builder.Logging.AddAzureWebAppDiagnostics();
 
 // Add services to the container.
 builder.Services.AddControllersWithViews();
